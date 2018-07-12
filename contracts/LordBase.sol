@@ -51,12 +51,12 @@ contract LordBase is Random{
             valToTransfer = warriorBaseContract.consequence(attackId, defenceId, attackAddr, defenceAddr);
             databaseContract.addAccountEth(attackAddr, valToTransfer);
             
-            battleConsequence =  1;
+            battleConsequence = 1;
         } else {
             valToTransfer = warriorBaseContract.consequence(defenceId, attackId, defenceAddr, attackAddr);
             databaseContract.addAccountEth(defenceAddr, valToTransfer);
             
-            battleConsequence =  0;
+            battleConsequence = 0;
         }
 
         emit Battle(attackId, defenceId, battleConsequence);

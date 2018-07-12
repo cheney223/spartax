@@ -190,6 +190,19 @@ const WarriorBase = {
         })
       })
     },
+
+    killWarrior:function(_id) {
+      let self = this
+      return new Promise(function(resolve,reject) {
+        self.instance.killWarrior.sendTransaction(
+          {from: window.web3.eth.accounts[0]}
+        ).then(killWarrior => {
+          resolve(killWarrior)
+        }).catch(err => {
+          reject(err)
+        })
+      })
+    }
     
   
   }

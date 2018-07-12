@@ -22,7 +22,9 @@ contract WarriorBase is ERC721
     /// @dev This emits when a new warrior is created(adopted) by user
     event CreateWarrior(address _owner, uint _val);
 
-    event Consequence(uint winnerId,uint loserId, address winnerAddr,address loserAddr, uint valToTransfer, uint ceToTransfer);
+    event Consequence(uint winnerId, uint loserId, address winnerAddr, address loserAddr, uint valToTransfer, uint ceToTransfer);
+
+    event KillWarrior(uint _id, address owner);
 
     mapping (uint => address) internal tokenApprovals;
     
@@ -38,6 +40,7 @@ contract WarriorBase is ERC721
     string public constant name = "SpartaxWarrior";
     string public constant symbol = "SW";
 
+    uint constant greenhandProtection = 30 minutes;
     uint constant miniValue = 10 ** 16;
 
     struct Warrior {
@@ -296,7 +299,7 @@ contract WarriorBase is ERC721
         uint winnerId,
         uint loserId, 
         address winnerAddr,
-        address loserAddr) tokenExist(winnerId) tokenExist(loserId) external returns(uint){
+        address loserAddr) external tokenExist(winnerId) tokenExist(loserId) returns(uint){
         
         require(tokenIndexToOwner[winnerId] == winnerAddr);
         require(tokenIndexToOwner[loserId] == loserAddr);
@@ -328,7 +331,7 @@ contract WarriorBase is ERC721
     }
 
     /// @dev "feed" the token with msg.value 
-    function feedWarrior(uint _id) tokenExist(_id) payable public returns(uint) {
+    function feedWarrior(uint _id) public tokenExist(_id) payable returns(uint) {
         require(tokenIndexToOwner[_id] == msg.sender);
         
         WarriorList[_id].val.add(msg.value);
@@ -337,9 +340,38 @@ contract WarriorBase is ERC721
         return this.balance;
     }
 
-    function addFund() payable public returns(uint) {
+    function _removeFromList(uint _id, address _owner) private {
+      
+        for (uint i = 0; i < ownerToTokenArray[_owner].length; i++) {
+            if (ownerToTokenArray[_owner][i] == _id) {
+                for (uint j = i; j < ownerToTokenArray[_owner].length - 1; j++)
+                    ownerToTokenArray[_owner][j] = ownerToTokenArray[_owner][j + 1];
+                ownerToTokenArray[_owner].length -= 1;
+                return;
+            }
+        }
+    }
+
+    /// @dev "kill" the token and sent its ether value back to owner's wallet
+    function killWarrior(uint _id) external tokenExist(_id) returns(uint) {
+        require(tokenIndexToOwner[_id] == msg.sender);
+
+        uint valToTransfer = WarriorList[_id].val;
+        
+        _removeFromList(_id, msg.sender);
+        tokenIndexToOwner[_id] = address(0);
+        ownerToTokenCount[msg.sender] = ownerToTokenCount[msg.sender].sub(1);
+        tokenIndexToOwnerIndex[_id] = 0;
+
+        databaseContract.reduceAccountEth(msg.sender,valToTransfer);
+        msg.sender.transfer(valToTransfer);
+
+        emit KillWarrior(_id, msg.sender);
+    }
+
+    function addFund() public payable  returns(uint) {
         require(msg.value > 0);
-        NewFund(this.balance);
+        emit NewFund(this.balance);
         return this.balance;
     }
 
