@@ -194,8 +194,11 @@ const WarriorBase = {
     killWarrior:function(_id) {
       let self = this
       return new Promise(function(resolve,reject) {
+        console.log('warrior Id to kill : '+_id)
         self.instance.killWarrior.sendTransaction(
-          {from: window.web3.eth.accounts[0]}
+          _id,
+          {from: window.web3.eth.accounts[0],
+          gas: 50000000}
         ).then(killWarrior => {
           resolve(killWarrior)
         }).catch(err => {

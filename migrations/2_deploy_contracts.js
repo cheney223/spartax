@@ -14,6 +14,6 @@ module.exports = function(deployer) {
         .then(() => Database.deployed())
           .then(Database => deployer.deploy(WarriorBase, Random.address, Database.address, {gas: 4712388}))
             .then(() => WarriorBase.deployed())
-              .then(WarriorBase => deployer.deploy(LordBase, WarriorBase.address, Database.address, {gas: 4712388}))
+              .then(WarriorBase => deployer.deploy(LordBase, WarriorBase.address, Database.address, {gas: 5000000}))
               
 };

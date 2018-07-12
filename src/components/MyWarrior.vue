@@ -101,6 +101,7 @@
                     <span style="position:relative;left:20px;"> CE {{ownToken.CE}}</span>
                   </div>
                   <el-button type="text" style="position:relative;left:-20px;" @click="pick(ownToken.id)"><font size="4">Pick</font></el-button>
+                  <el-button type="text" style="position:relative;left:20px;" @click="kill(ownToken.id)"><font size="4">Kill</font></el-button>
               </div>
             </div>
           </el-card>
@@ -183,6 +184,13 @@ export default {
           message: 'Choose  Gladiator #' + String(choiceId) + ' successfully!',
           type: 'success'
         })
+    },
+
+    kill(choiceId) {
+      let self = this
+      WarriorBase.killWarrior(choiceId).then(killWarrior => {
+        
+      })
     },
 
     routerToWeapon(){
