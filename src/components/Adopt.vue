@@ -174,8 +174,8 @@ export default {
 
   beforeCreate: function(){
     let self = this
-    WarriorBase.getTokenNum().then(getTokenNum => {
-      Vue.set(self.contractDetails,'warriorNum',Number(getTokenNum))
+    WarriorBase.getActiveWarriorListLength().then(ActiveWarriorListLength => {
+      Vue.set(self.contractDetails,'warriorNum',Number(ActiveWarriorListLength))
       console.log('All token number : ' + getTokenNum)
     })
 

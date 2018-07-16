@@ -28,6 +28,18 @@ const WarriorBase = {
       return window.web3.eth.accounts[0]
     },
 
+    getActiveWarriorListLength: function() {
+      let self = this
+      return new Promise(function(resolve,reject) {
+        self.instance.getActiveWarriorListLength.call(
+        ).then(ActiveWarriorListLength => {
+          resolve(ActiveWarriorListLength)
+        }).catch(err => {
+          reject(err)
+        })
+      })
+    },
+
     consequence:function(winnerId, loserId, winnerAddr, loserAddr) {
       let self = this
       

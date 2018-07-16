@@ -54,6 +54,7 @@ contract WarriorBase is ERC721
     }
 
     Warrior[] private WarriorList;
+    uint private ActiveWarriorListLength; 
 
     /// @dev check the given tokenId is in the tokenList and its owner is not null.
     modifier tokenExist(uint256 _id) {
@@ -69,6 +70,9 @@ contract WarriorBase is ERC721
 
         randomContract = Random(_randomContract);
         databaseContract = Database(_databaseContract);
+
+        /// warrior list contains the 4 coaches at the very beginning
+        ActiveWarriorListLength = 4;
 
         /// drop index 0
         WarriorList.length += 1;
@@ -153,6 +157,7 @@ contract WarriorBase is ERC721
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
+        ActiveWarriorListLength = ActiveWarriorListLength.add(1);
         CreateWarrior(msg.sender, msg.value);
         return newWarriorId;
     }
@@ -180,6 +185,7 @@ contract WarriorBase is ERC721
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
+        ActiveWarriorListLength = ActiveWarriorListLength.add(1);
         CreateWarrior(msg.sender, msg.value);
         return newWarriorId;
     }
@@ -207,6 +213,7 @@ contract WarriorBase is ERC721
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
+        ActiveWarriorListLength = ActiveWarriorListLength.add(1);
         CreateWarrior(msg.sender, msg.value);
         return newWarriorId;
     }
@@ -234,6 +241,7 @@ contract WarriorBase is ERC721
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
+        ActiveWarriorListLength = ActiveWarriorListLength.add(1);
         CreateWarrior(msg.sender, msg.value);
         return newWarriorId;
     }
@@ -292,6 +300,11 @@ contract WarriorBase is ERC721
             }
         }
 
+    }
+
+    /// @dev return active warrior numbers for now
+    function getActiveWarriorListLength() external view returns(uint) {
+        return ActiveWarriorListLength;
     }
 
     /// @dev calculate the consequece of a finished battle
@@ -367,6 +380,7 @@ contract WarriorBase is ERC721
         databaseContract.reduceAccountEth(msg.sender,valToTransfer);
         msg.sender.transfer(valToTransfer);
         
+        ActiveWarriorListLength = ActiveWarriorListLength.sub(1);
         emit KillWarrior(_id, msg.sender, tokenToOwnerIndex);
         return tokenToOwnerIndex;
     }
