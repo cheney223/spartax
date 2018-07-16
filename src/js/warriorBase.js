@@ -198,10 +198,12 @@ const WarriorBase = {
         self.instance.killWarrior.sendTransaction(
           _id,
           {from: window.web3.eth.accounts[0],
-          gas: 50000000}
+          gas: 5000000}
         ).then(killWarrior => {
+          console.log('kill Warrior : '+killWarrior)
           resolve(killWarrior)
         }).catch(err => {
+          console.log(err)
           reject(err)
         })
       })

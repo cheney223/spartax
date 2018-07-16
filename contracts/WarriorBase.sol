@@ -24,7 +24,7 @@ contract WarriorBase is ERC721
 
     event Consequence(uint winnerId, uint loserId, address winnerAddr, address loserAddr, uint valToTransfer, uint ceToTransfer);
 
-    event KillWarrior(uint _id, address owner);
+    event KillWarrior(uint _id, address owner, uint tokenToOwnerIndex);
 
     mapping (uint => address) internal tokenApprovals;
     
@@ -334,7 +334,7 @@ contract WarriorBase is ERC721
     function feedWarrior(uint _id) public tokenExist(_id) payable returns(uint) {
         require(tokenIndexToOwner[_id] == msg.sender);
         
-        WarriorList[_id].val.add(msg.value);
+        WarriorList[_id].val = WarriorList[_id].val.add(msg.value);
         databaseContract.addAccountEth(msg.sender, msg.value);
         NewFund(this.balance);
         return this.balance;
@@ -357,7 +357,8 @@ contract WarriorBase is ERC721
         require(tokenIndexToOwner[_id] == msg.sender);
 
         uint valToTransfer = WarriorList[_id].val;
-        
+        uint tokenToOwnerIndex = tokenIndexToOwnerIndex[_id];
+
         _removeFromList(_id, msg.sender);
         tokenIndexToOwner[_id] = address(0);
         ownerToTokenCount[msg.sender] = ownerToTokenCount[msg.sender].sub(1);
@@ -365,8 +366,9 @@ contract WarriorBase is ERC721
 
         databaseContract.reduceAccountEth(msg.sender,valToTransfer);
         msg.sender.transfer(valToTransfer);
-
-        emit KillWarrior(_id, msg.sender);
+        
+        emit KillWarrior(_id, msg.sender, tokenToOwnerIndex);
+        return tokenToOwnerIndex;
     }
 
     function addFund() public payable  returns(uint) {
@@ -400,10 +402,10 @@ contract WarriorBase is ERC721
             ownerToTokenCount[_to] = 0;
         }
         ownerToTokenArray[_to].push(_tokenId);
-        ownerToTokenCount[_to].add(1);
+        ownerToTokenCount[_to] = ownerToTokenCount[_to].add(1);
         tokenIndexToOwnerIndex[_tokenId] = (uint256)(ownerToTokenArray[_to].length.sub(1));
 
-        Transfer(_from, _to, _tokenId);
+        emit Transfer(_from, _to, _tokenId);
     }
 
 

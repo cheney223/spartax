@@ -72,7 +72,7 @@
     <div style="position: relative;top: 100px; ">
       <el-row >
         <el-col :span="4" v-for="ownToken in ownTokenList" :key="ownToken.id" :offset="3" style="margin-bottom:40px">
-          <el-card :body-style="{ padding: '0px', height:'360px'}" shadow="hover" style="width: 260px;height: 350px;">
+          <el-card v-show="ownToken.show" :body-style="{ padding: '0px', height:'360px'}" shadow="hover" style="width: 260px;height: 350px;">
             <div style="padding: 6px;height: 310px;">
               <div>
                   <!-- <div><font size="5">{{ownToken.pcname}}</font></div>
@@ -164,6 +164,7 @@ export default {
         obj.prestige = Number(value[i][5])
         obj.CE = Number(value[i][6])
         obj.id = tokenIds[i]
+        obj.show = true
         self.ownTokenList.push(obj)
       }
     })
@@ -189,7 +190,18 @@ export default {
     kill(choiceId) {
       let self = this
       WarriorBase.killWarrior(choiceId).then(killWarrior => {
+        self.$message({
+          message: 'Gladiator #' + String(choiceId) + ' has been successfully killed!',
+          type: 'success'
+        })
         
+        for (var i = 0;i<self.ownTokenList.length; i++) {
+          if (self.ownTokenList[i].id == choiceId) {
+            Vue.set(self.ownTokenList[i], 'show', false)
+            break
+          }
+        }
+      
       })
     },
 
