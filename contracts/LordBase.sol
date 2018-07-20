@@ -38,8 +38,8 @@ contract LordBase is Random{
         require(attackAddr != address(0));
         require(defenceAddr != address(0));
 
-        uint[7] memory attackToken = warriorBaseContract.getToken(attackId);
-        uint[7] memory defenceToken = warriorBaseContract.getToken(defenceId);
+        uint[9] memory attackToken = warriorBaseContract.getToken(attackId);
+        uint[9] memory defenceToken = warriorBaseContract.getToken(defenceId);
         uint attackCE = attackToken[6];
         uint defenceCE = defenceToken[6];
         uint dice = _rand() % (attackCE + defenceCE);

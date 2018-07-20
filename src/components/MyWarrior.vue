@@ -163,6 +163,8 @@ export default {
         obj.title = Number(value[i][4])
         obj.prestige = Number(value[i][5])
         obj.CE = Number(value[i][6])
+        obj.createTime = Number(value[i][7])
+        obj.destroyTime = Number(value[i][8])
         obj.id = tokenIds[i]
         obj.show = true
         self.ownTokenList.push(obj)

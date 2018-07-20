@@ -83,6 +83,7 @@
         <h2>prestige {{chosenToken.prestige}}</h2>
         <h2>combo {{chosenToken.combo}}</h2>
         <h2>CE {{chosenToken.CE}}</h2>
+        <h2>status {{ chosenToken.status }}</h2>
       </div>
     </div>
 
@@ -119,6 +120,9 @@
                   <div>
                     <span style="position:relative;left:-55px;">combo {{enemy.combo}}</span>
                     <span style="position:relative;left:20px;"> CE {{enemy.CE}}</span>
+                  </div>
+                  <div>
+                    <span style="position:relative;left:-55px;">status {{enemy.status}}</span>
                   </div>
                   <el-button type="text" style="position:relative;left:-20px;" @click="fight(enemy.id)"><font size="4">Fight</font></el-button>
               </div>
@@ -177,6 +181,9 @@ export default {
           obj.title = Number(value[4])
           obj.prestige = Number(value[5])
           obj.CE = Number(value[6])
+          obj.createTime = Number(value[7])
+          obj.destroyTime = Number(value[8])
+          obj.status = calcStatus(obj.title, obj.createTime, obj.destroyTime)
           self.chosenToken = obj
           self.NotHasChosen = false
       })
@@ -204,8 +211,12 @@ export default {
           obj.title = Number(value[i][4])
           obj.prestige = Number(value[i][5])
           obj.CE = Number(value[i][6])
+          obj.createTime = Number(value[i][7])
+          obj.destroyTime = Number(value[i][8])
+          obj.status = calcStatus(obj.title, obj.createTime, obj.destroyTime)
           obj.winningPercentage = NUmber(self.chosenToken.CE * 100 / (self.chosenToken.CE + obj.CE)).toFixed(2)
           obj.id = tokenIds[i]
+          
           self.enemylist.push(obj)
         }
 
@@ -226,7 +237,18 @@ export default {
       this.open = !this.open
       this.docked = !flag
 	  },
-	
+  
+    calcStatus (title, createTime, destroyTime) {
+      if (title >= 7)
+        return 'coach'
+      var timestamp = Date.parse(new Date())
+      if (timestamp - createTime <= 1800)
+        return 'beginner'
+      if (timestamp - destroyTime <= 3600)
+        return 'suicider'
+      return 'active'
+    },
+
     routerToWeapon(){
       this.$router.push('/weapon')
     },

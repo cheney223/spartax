@@ -48,9 +48,11 @@ contract WarriorBase is ERC721
         uint winCount;
         uint lossCount;
         uint combo;
-        uint title;     /// title: default 0; primary coach 7 intermediate coach 8 advanced coach 9 master 10
+        uint title;     /// title: default--0 primary coach--7 intermediate coach--8 advanced coach--9 master--10
         uint prestige;
         uint ce;    /// comat effectiveness
+        uint createTime;
+        uint destroyTime;
     }
 
     Warrior[] private WarriorList;
@@ -154,6 +156,8 @@ contract WarriorBase is ERC721
         war.title = 0;
         war.prestige = 0;
         war.ce = 10;
+        war.createTime = now;
+        war.destroyTime = 0;
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
@@ -182,6 +186,8 @@ contract WarriorBase is ERC721
         war.title = 0;
         war.prestige = 0;
         war.ce = 50;
+        war.createTime = now;
+        war.destroyTime = 0;
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
@@ -210,6 +216,8 @@ contract WarriorBase is ERC721
         war.title = 0;
         war.prestige = 0;
         war.ce = 100;
+        war.createTime = now;
+        war.destroyTime = 0;
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
@@ -238,6 +246,8 @@ contract WarriorBase is ERC721
         war.title = 0;
         war.prestige = 0;
         war.ce = 500;
+        war.createTime = now;
+        war.destroyTime = 0;
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
@@ -262,7 +272,7 @@ contract WarriorBase is ERC721
     }
 
     /// @dev Ruturn token details by tokenId
-    function getToken(uint256 _id) external view tokenExist(_id) returns (uint[7] datas) {
+    function getToken(uint256 _id) external view tokenExist(_id) returns (uint[9] datas) {
         Warrior storage warrior = WarriorList[_id];
         datas[0] = warrior.val;
         datas[1] = warrior.winCount;
@@ -271,6 +281,8 @@ contract WarriorBase is ERC721
         datas[4] = warrior.title;
         datas[5] = warrior.prestige;
         datas[6] = warrior.ce;
+        datas[7] = warrior.createTime;
+        datas[8] = warrior.destroyTime;
     }
 
     /// @dev return all tokens owned by owner
