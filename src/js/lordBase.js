@@ -31,7 +31,7 @@ const LordBase = {
         self.instance.battle.sendTransaction(
           attackId,
           defenceId,
-          {from: window.web3.eth.accounts[0]}).then(battle => {
+          {from: window.web3.eth.accounts[0]}).then(winOrLose => {
             // var battleEvent = self.instance.Battle({attackId: attackId})
             // battleEvent.watch(function(err, result){
             //   if (err) {
@@ -40,7 +40,7 @@ const LordBase = {
             //   console.log('battle consequence : ' + Number(result.args.battleConsequence))
             //   resolve(battle)
             // })
-            resolve(battle)
+            resolve(winOrLose)
           }).catch(err => {
             reject(err)
             console.log('err = '+ err)

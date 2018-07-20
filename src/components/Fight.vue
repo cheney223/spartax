@@ -104,6 +104,8 @@
                   <!-- <i class="el-icon-view" style="position:relative;left:-80px;"></i> -->
                   <div>
                     <span style="position:relative;left:-90px;">ID {{enemy.id}}</span>
+                    <span style="position:relative;left:20px;">Percentage {{enemy.winningPercentage}}%</span>
+                    
                     <!-- <span style="position:relative; left:20px;">Value {{enemy.val}}</span> -->
                   </div>
                   <div>
@@ -163,6 +165,22 @@ export default {
       Vue.set(self.accountDetail,'accountValue',accountEthVal)
     })
     
+    var choiceId = localStorage.choiceId
+    if (choiceId != 'undefined') {
+      WarriorBase.getToken(Number(choiceId)).then(function (value) {
+          var obj = {}
+          obj.id = choiceId
+          obj.val = Number(value[0])
+          obj.winCount = Number(value[1])
+          obj.lossCount = Number(value[2])
+          obj.combo = Number(value[3])
+          obj.title = Number(value[4])
+          obj.prestige = Number(value[5])
+          obj.CE = Number(value[6])
+          self.chosenToken = obj
+          self.NotHasChosen = false
+      })
+    }
 
     WarriorBase.getEnemyTokens().then(function(enemyTokens) {
       var tokens =[]
@@ -186,6 +204,7 @@ export default {
           obj.title = Number(value[i][4])
           obj.prestige = Number(value[i][5])
           obj.CE = Number(value[i][6])
+          obj.winningPercentage = NUmber(self.chosenToken.CE * 100 / (self.chosenToken.CE + obj.CE)).toFixed(2)
           obj.id = tokenIds[i]
           self.enemylist.push(obj)
         }
@@ -198,28 +217,8 @@ export default {
             self.enemylist[i] = obj
           }
         })
-
-        var choiceId = localStorage.choiceId
-        if (choiceId != 'undefined') {
-          WarriorBase.getToken(Number(choiceId)).then(function (value) {
-              var obj = {}
-              obj.id = choiceId
-              obj.val = Number(value[0])
-              obj.winCount = Number(value[1])
-              obj.lossCount = Number(value[2])
-              obj.combo = Number(value[3])
-              obj.title = Number(value[4])
-              obj.prestige = Number(value[5])
-              obj.CE = Number(value[6])
-              self.chosenToken = obj
-              self.NotHasChosen = false
-          })
-        }
       })
-
-
     })
-
   }, 
 
   methods: {
@@ -257,7 +256,7 @@ export default {
       var attackId = self.chosenToken.id
       var attackAddrPromise = WarriorBase.getTokenOwner(Number(attackId))
       var defenceAddrPromise = WarriorBase.getTokenOwner(Number(defenceId))
-
+      
       attackAddrPromise.then(function (value){
         console.log('attackAddr = '+ value)
         var attackAddr = value
@@ -282,15 +281,11 @@ export default {
                 type: 'error'
                 })
               }
-
-
           })
         })
       })
       
-
     }
-  
   }
 }
 
