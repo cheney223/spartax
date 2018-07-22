@@ -350,8 +350,24 @@ contract WarriorBase is ERC721
         loser.val = loser.val.sub(valToTransfer);
         loser.lossCount = loser.lossCount.add(1);
         loser.combo = 0;
+        loser.title = 0;
         loser.ce = loser.ce.sub(ceToTransfer);
 
+        if (winner.combo < 1)
+            winner.title = 0;
+        else if (winner.combo < 2)
+            winner.title = 1;
+        else if (winner.combo < 4)
+            winner.title = 2;
+        else if (winner.combo < 8)
+            winner.title = 3;
+        else if (winner.combo < 12)
+            winner.title = 4;
+        else if (winner.combo < 20)
+            winner.title = 5;
+        else
+            winner.title = 6;
+        
         emit Consequence(winnerId,loserId, winnerAddr, loserAddr, valToTransfer, ceToTransfer);
         return valToTransfer;
     }

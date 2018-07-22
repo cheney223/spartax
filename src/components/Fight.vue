@@ -78,7 +78,7 @@
       <div v-else >
         <h2>ID {{chosenToken.id}}</h2>
         <h2>win {{chosenToken.winCount}}</h2>
-        <h2>title Lv{{chosenToken.title}}</h2>
+        <h2>title {{chosenToken.title}}</h2>
         <h2>loss {{chosenToken.lossCount}}</h2>
         <h2>prestige {{chosenToken.prestige}}</h2>
         <h2>combo {{chosenToken.combo}}</h2>
@@ -110,8 +110,8 @@
                     <!-- <span style="position:relative; left:20px;">Value {{enemy.val}}</span> -->
                   </div>
                   <div>
-                    <span style="position:relative;left:-60px;">win {{enemy.winCount}}</span>
-                    <span style="position:relative;left: 20px;">title Lv{{enemy.title}}</span>
+                    <span style="position:relative;left:-35px;">win {{enemy.winCount}}</span>
+                    <span style="position:relative;left: 20px;">title {{enemy.title}}</span>
                   </div>
                   <div>
                     <span style="position:relative;left:-55px;">loss {{enemy.lossCount}}</span>
@@ -157,7 +157,7 @@ export default {
       chosenToken: {},
       indexMapping: [],
       NotHasChosen: true,
-      titleList: ['','勇士','战士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练']
+      titleList: ['战士','勇士','战士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练']
     }
   },
   
@@ -180,7 +180,7 @@ export default {
           obj.winCount = Number(value[1])
           obj.lossCount = Number(value[2])
           obj.combo = Number(value[3])
-          obj.title = Number(value[4])
+          obj.title = self.titleList[Number(value[4])]
           obj.prestige = Number(value[5])
           obj.CE = Number(value[6])
           obj.createTime = Number(value[7])
@@ -210,7 +210,7 @@ export default {
           obj.winCount = Number(value[i][1])
           obj.lossCount = Number(value[i][2])
           obj.combo = Number(value[i][3])
-          obj.title = Number(value[i][4])
+          obj.title = self.titleList[Number(value[i][4])]
           obj.prestige = Number(value[i][5])
           obj.CE = Number(value[i][6])
           obj.createTime = Number(value[i][7])
@@ -315,18 +315,21 @@ export default {
                 Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
                 Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
                 Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
-                Vue.set(self.enemylist[indexInEnemyList],'title',Number(value[4]))
+                Vue.set(self.enemylist[indexInEnemyList],'title',self.titleList[Number(value[4])])
                 Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
                 Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
+                
                 WarriorBase.getToken(Number(attackId)).then(function (value) {
                   var obj = {}
                   Vue.set(self.chosenToken,'val',Number(value[0]))
                   Vue.set(self.chosenToken,'winCount',Number(value[1]))
                   Vue.set(self.chosenToken,'lossCount',Number(value[2]))
                   Vue.set(self.chosenToken,'combo',Number(value[3]))
-                  Vue.set(self.chosenToken,'title',Number(value[4]))
+                  Vue.set(self.chosenToken,'title',self.titleList[Number(value[4])])
                   Vue.set(self.chosenToken,'prestige',Number(value[5]))
                   Vue.set(self.chosenToken,'CE',Number(value[6]))
+                  var newPercentage =  self.chosenToken.CE / (self.chosenToken.CE + self.enemylist[indexInEnemyList].CE) * 100
+                  Vue.set(self.enemylist[indexInEnemyList],'winningPercentage',Number(newPercentage).toFixed(2))
                 })
               })
 

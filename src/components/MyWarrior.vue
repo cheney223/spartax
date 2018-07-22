@@ -90,7 +90,7 @@
                   </div>
                   <div>
                     <span style="position:relative;left:-60px;">win {{ownToken.winCount}}</span>
-                    <span style="position:relative;left: 20px;">title Lv{{ownToken.title}}</span>
+                    <span style="position:relative;left: 20px;">title {{ownToken.title}}</span>
                   </div>
                   <div>
                     <span style="position:relative;left:-55px;">loss {{ownToken.lossCount}}</span>
@@ -130,7 +130,7 @@ export default {
       curAddr: window.web3.eth.accounts[0],
       accountDetail: {},
       ownTokenList: [],
-      titleList: ['','勇士','战士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练']
+      titleList: ['战士','勇士','战士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练']
     }
   },
 
@@ -161,7 +161,7 @@ export default {
         obj.winCount = Number(value[i][1])
         obj.lossCount = Number(value[i][2])
         obj.combo = Number(value[i][3])
-        obj.title = Number(value[i][4])
+        obj.title = self.titleList[Number(value[i][4])]
         obj.prestige = Number(value[i][5])
         obj.CE = Number(value[i][6])
         obj.createTime = Number(value[i][7])
