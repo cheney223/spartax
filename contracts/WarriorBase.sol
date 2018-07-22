@@ -349,6 +349,7 @@ contract WarriorBase is ERC721
         var loser = WarriorList[loserId];
         loser.val = loser.val.sub(valToTransfer);
         loser.lossCount = loser.lossCount.add(1);
+        loser.combo = 0;
         loser.ce = loser.ce.sub(ceToTransfer);
 
         emit Consequence(winnerId,loserId, winnerAddr, loserAddr, valToTransfer, ceToTransfer);

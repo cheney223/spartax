@@ -97,14 +97,14 @@
                   <!-- <div><font size="5">{{enemy.pcname}}</font></div>
                   <div style="position: relative;top: 15px;text-align: center;">{{enemy.pname}}</div> -->
               </div>
-              <div style="position: relative;top: 30px;left:0">
+              <div style="position: relative;top: 15px;left:0">
                   <img src="/static/warrior.png" class="image">
                   <!-- <div style="position: relative;top: 10px;left: 66px;"><i class="el-icon-time"></i>{{enemy.pdatesave}}</div> -->
               </div>
-              <div style="position: relative;top: 10px;">
+              <div style="position: relative;top: 5px;">
                   <!-- <i class="el-icon-view" style="position:relative;left:-80px;"></i> -->
                   <div>
-                    <span style="position:relative;left:-90px;">ID {{enemy.id}}</span>
+                    <span style="position:relative;left:-30px;">ID {{enemy.id}}</span>
                     <span style="position:relative;left:20px;">Percentage {{enemy.winningPercentage}}%</span>
                     
                     <!-- <span style="position:relative; left:20px;">Value {{enemy.val}}</span> -->
@@ -122,7 +122,7 @@
                     <span style="position:relative;left:20px;"> CE {{enemy.CE}}</span>
                   </div>
                   <div>
-                    <span style="position:relative;left:-55px;">status {{enemy.status}}</span>
+                    <span style="position:relative;left:-70px;">status {{enemy.status}}</span>
                   </div>
                   <el-button type="text" style="position:relative;left:-20px;" @click="fight(enemy.id)"><font size="4">Fight</font></el-button>
               </div>
@@ -155,6 +155,7 @@ export default {
       enemylist: [],
       accountDetail:{},
       chosenToken: {},
+      indexMapping: [],
       NotHasChosen: true,
     }
   },
@@ -183,7 +184,7 @@ export default {
           obj.CE = Number(value[6])
           obj.createTime = Number(value[7])
           obj.destroyTime = Number(value[8])
-          obj.status = calcStatus(obj.title, obj.createTime, obj.destroyTime)
+          obj.status = self.calcStatus(obj.title, obj.createTime, obj.destroyTime)
           self.chosenToken = obj
           self.NotHasChosen = false
       })
@@ -213,10 +214,11 @@ export default {
           obj.CE = Number(value[i][6])
           obj.createTime = Number(value[i][7])
           obj.destroyTime = Number(value[i][8])
-          obj.status = calcStatus(obj.title, obj.createTime, obj.destroyTime)
-          obj.winningPercentage = NUmber(self.chosenToken.CE * 100 / (self.chosenToken.CE + obj.CE)).toFixed(2)
+          obj.status = self.calcStatus(obj.title, obj.createTime, obj.destroyTime)
+          obj.winningPercentage = Number(self.chosenToken.CE * 100 / (self.chosenToken.CE + obj.CE)).toFixed(2)
           obj.id = tokenIds[i]
-          
+          self.indexMapping.push(obj.id)
+          //obj.index = i
           self.enemylist.push(obj)
         }
 
@@ -228,6 +230,7 @@ export default {
             self.enemylist[i] = obj
           }
         })
+
       })
     })
   }, 
@@ -238,7 +241,7 @@ export default {
       this.docked = !flag
 	  },
   
-    calcStatus (title, createTime, destroyTime) {
+    calcStatus: function (title, createTime, destroyTime) {
       if (title >= 7)
         return 'coach'
       var timestamp = Date.parse(new Date())
@@ -303,6 +306,29 @@ export default {
                 type: 'error'
                 })
               }
+
+              WarriorBase.getToken(Number(defenceId)).then(function (value) {
+                var obj = {}
+                var indexInEnemyList = self.indexMapping.indexOf(defenceId)
+                Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
+                Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
+                Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
+                Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
+                Vue.set(self.enemylist[indexInEnemyList],'title',Number(value[4]))
+                Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
+                Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
+                WarriorBase.getToken(Number(attackId)).then(function (value) {
+                  var obj = {}
+                  Vue.set(self.chosenToken,'val',Number(value[0]))
+                  Vue.set(self.chosenToken,'winCount',Number(value[1]))
+                  Vue.set(self.chosenToken,'lossCount',Number(value[2]))
+                  Vue.set(self.chosenToken,'combo',Number(value[3]))
+                  Vue.set(self.chosenToken,'title',Number(value[4]))
+                  Vue.set(self.chosenToken,'prestige',Number(value[5]))
+                  Vue.set(self.chosenToken,'CE',Number(value[6]))
+                })
+              })
+
           })
         })
       })

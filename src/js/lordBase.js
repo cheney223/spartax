@@ -32,15 +32,14 @@ const LordBase = {
           attackId,
           defenceId,
           {from: window.web3.eth.accounts[0]}).then(winOrLose => {
-            // var battleEvent = self.instance.Battle({attackId: attackId})
-            // battleEvent.watch(function(err, result){
-            //   if (err) {
-            //     console.log(err)
-            //   }
-            //   console.log('battle consequence : ' + Number(result.args.battleConsequence))
-            //   resolve(battle)
-            // })
-            resolve(winOrLose)
+            var battleEvent = self.instance.Battle({attackId: attackId, defenceId: defenceId})
+            battleEvent.watch(function(err, result){
+              if (err) {
+                console.log(err)
+              }
+              console.log('battle consequence : ' + Number(result.args.battleConsequence))
+              resolve(Number(result.args.battleConsequence))
+            })
           }).catch(err => {
             reject(err)
             console.log('err = '+ err)
