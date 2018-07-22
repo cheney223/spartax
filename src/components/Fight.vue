@@ -157,6 +157,7 @@ export default {
       chosenToken: {},
       indexMapping: [],
       NotHasChosen: true,
+      titleList: ['','勇士','战士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练']
     }
   },
   

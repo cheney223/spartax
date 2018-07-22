@@ -42,10 +42,13 @@ contract LordBase is Random{
         uint[9] memory defenceToken = warriorBaseContract.getToken(defenceId);
         uint attackCE = attackToken[6];
         uint defenceCE = defenceToken[6];
+        uint defenceTitle = defenceToken[4];
         uint dice = _rand() % (attackCE + defenceCE);
         uint battleConsequence;
-
         uint valToTransfer;
+        
+        if (defenceTitle >= 7)
+            dice = dice.sub((dice / 100) * 5);
         
         if (dice < attackCE) {
             valToTransfer = warriorBaseContract.consequence(attackId, defenceId, attackAddr, defenceAddr);

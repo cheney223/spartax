@@ -130,6 +130,7 @@ export default {
       curAddr: window.web3.eth.accounts[0],
       accountDetail: {},
       ownTokenList: [],
+      titleList: ['','勇士','战士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练']
     }
   },
 
