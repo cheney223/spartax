@@ -53,12 +53,14 @@ contract LordBase is Random{
         if (dice < attackCE) {
             valToTransfer = warriorBaseContract.consequence(attackId, defenceId, attackAddr, defenceAddr);
             databaseContract.addAccountEth(attackAddr, valToTransfer);
-            
+            if (defenceToken[4] < 7)
+            databaseContract.reduceAccountEth(defenceAddr, valToTransfer);
             battleConsequence = 1;
         } else {
             valToTransfer = warriorBaseContract.consequence(defenceId, attackId, defenceAddr, attackAddr);
             databaseContract.addAccountEth(defenceAddr, valToTransfer);
-            
+            if (attackToken[4] < 7)
+                databaseContract.reduceAccountEth(attackAddr, valToTransfer);
             battleConsequence = 0;
         }
 

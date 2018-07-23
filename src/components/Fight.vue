@@ -279,6 +279,15 @@ export default {
 
     fight(defenceId) {
       let self = this
+      var indexInEnemyList = self.indexMapping.indexOf(defenceId)
+      if (self.enemylist[indexInEnemyList].status == 'beginner')
+      {
+        self.$message({
+                message: 'You cannot attack a greenhand!',
+                type: 'error'
+                })
+        return
+      }
       var attackId = self.chosenToken.id
       var attackAddrPromise = WarriorBase.getTokenOwner(Number(attackId))
       var defenceAddrPromise = WarriorBase.getTokenOwner(Number(defenceId))
@@ -310,7 +319,7 @@ export default {
 
               WarriorBase.getToken(Number(defenceId)).then(function (value) {
                 var obj = {}
-                var indexInEnemyList = self.indexMapping.indexOf(defenceId)
+                /// var indexInEnemyList = self.indexMapping.indexOf(defenceId)
                 Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
                 Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
                 Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
@@ -340,8 +349,6 @@ export default {
     }
   }
 }
-
-
 </script>
 
 <style>

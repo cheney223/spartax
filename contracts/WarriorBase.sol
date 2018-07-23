@@ -22,7 +22,7 @@ contract WarriorBase is ERC721
     /// @dev This emits when a new warrior is created(adopted) by user
     event CreateWarrior(address _owner, uint _val);
 
-    event Consequence(uint winnerId, uint loserId, address winnerAddr, address loserAddr, uint valToTransfer, uint ceToTransfer);
+    event Consequence(uint winnerId, uint loserId, address winnerAddr, address loserAddr, uint valToTransfer, uint ceToTransfer, uint winnerTitle, uint loserTitle);
 
     event KillWarrior(uint _id, address owner, uint tokenToOwnerIndex);
 
@@ -340,18 +340,22 @@ contract WarriorBase is ERC721
             ceToTransfer = WarriorList[loserId].ce.div(2);
         }
 
-        var winner = WarriorList[winnerId];
+        Warrior storage winner = WarriorList[winnerId];
         winner.val = winner.val.add(valToTransfer);
         winner.winCount = winner.winCount.add(1);
         winner.combo = winner.combo.add(1);
         winner.ce = winner.ce.add(ceToTransfer);
 
-        var loser = WarriorList[loserId];
-        loser.val = loser.val.sub(valToTransfer);
+        Warrior storage loser = WarriorList[loserId];
         loser.lossCount = loser.lossCount.add(1);
-        loser.combo = 0;
-        loser.title = 0;
-        loser.ce = loser.ce.sub(ceToTransfer);
+
+        if (loser.title < 7)        /// if the loser is a coach, his value shall not be reduced.
+        {
+            loser.val = loser.val.sub(valToTransfer);
+            loser.combo = 0;
+            loser.title = 0;
+            loser.ce = loser.ce.sub(ceToTransfer);
+        }
 
         if (winner.combo < 1)
             winner.title = 0;
@@ -368,7 +372,7 @@ contract WarriorBase is ERC721
         else
             winner.title = 6;
         
-        emit Consequence(winnerId,loserId, winnerAddr, loserAddr, valToTransfer, ceToTransfer);
+        emit Consequence(winnerId,loserId, winnerAddr, loserAddr, valToTransfer, ceToTransfer, winner.title, loser.title);
         return valToTransfer;
     }
 
@@ -407,9 +411,9 @@ contract WarriorBase is ERC721
         tokenIndexToOwnerIndex[_id] = 0;
 
         databaseContract.reduceAccountEth(msg.sender,valToTransfer);
-        msg.sender.transfer(valToTransfer);
-        
         ActiveWarriorListLength = ActiveWarriorListLength.sub(1);
+        
+        msg.sender.transfer(valToTransfer);
         emit KillWarrior(_id, msg.sender, tokenToOwnerIndex);
         return tokenToOwnerIndex;
     }
