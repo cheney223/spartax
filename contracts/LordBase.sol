@@ -34,7 +34,26 @@ contract LordBase is Random{
             return 0;
         return 1;
     }
-    
+
+    function calcPrestige(uint _dice) private view returns(uint) {
+        if (_dice <= 20)
+            return 16;
+        else if (_dice <= 25)
+            return 15;
+        else if (_dice <= 40)
+            return 12;
+        else if (_dice <= 50)
+            return 10;
+        else if (_dice <= 75)
+            return 5;
+        else if (_dice <= 80)
+            return 4;
+        else if (_dice <= 90)
+            return 2;
+        else if (_dice <= 95)
+            return 1;
+    }
+
     function battle(
         uint attackId,
         uint defenceId) external returns(uint){
@@ -50,28 +69,42 @@ contract LordBase is Random{
         uint[13] memory defenceToken = warriorBaseContract.getToken(defenceId);
         uint attackCE = attackToken[6];
         uint defenceCE = defenceToken[6];
-        uint defenceTitle = defenceToken[4];
         uint dice = _rand() % (attackCE + defenceCE);
         uint battleConsequence;
         uint valToTransfer;
         
-        if (defenceTitle >= 7 && defenceTitle <= 10)
+        if (defenceToken[4]>= 7 && defenceToken[4] <= 10)
         {
             dice = dice.sub((dice / 100) * 5);
             warriorBaseContract.setCoachCoolDownTime(defenceId, attackId);
         }
+        uint winningPrestige = calcPrestige(dice * 100 / (attackCE + defenceCE));
 
         if (dice < attackCE) {
             valToTransfer = warriorBaseContract.consequence(attackId, defenceId, attackAddr, defenceAddr);
             databaseContract.addAccountEth(attackAddr, valToTransfer);
+            if (attackToken[4] < 7) 
+            {
+                warriorBaseContract.addPrestige(attackId, winningPrestige);
+            }
             if (defenceToken[4] < 7)
-            databaseContract.reduceAccountEth(defenceAddr, valToTransfer);
+            {
+                databaseContract.reduceAccountEth(defenceAddr, valToTransfer);
+                warriorBaseContract.subPrestige(defenceId, defenceToken[5].div(2));
+            }
             battleConsequence = 1;
         } else {
             valToTransfer = warriorBaseContract.consequence(defenceId, attackId, defenceAddr, attackAddr);
             databaseContract.addAccountEth(defenceAddr, valToTransfer);
             if (attackToken[4] < 7)
+            {
                 databaseContract.reduceAccountEth(attackAddr, valToTransfer);
+                warriorBaseContract.subPrestige(defenceId, attackToken[5].div(2));
+            }
+            if (defenceToken[4] < 7)
+            {
+                warriorBaseContract.addPrestige(defenceId, winningPrestige);
+            }
             battleConsequence = 0;
         }
 

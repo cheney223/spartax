@@ -418,6 +418,14 @@ contract WarriorBase is ERC721
         return valToTransfer;
     }
 
+    function addPrestige(uint tokenId, uint prestigeAmt) tokenExist(tokenId) external {
+        WarriorList[tokenId].prestige = WarriorList[tokenId].prestige.add(prestigeAmt);
+    }
+
+    function subPrestige(uint tokenId, uint prestigeAmt) tokenExist(tokenId) external {
+        WarriorList[tokenId].prestige = WarriorList[tokenId].prestige.sub(prestigeAmt);
+    }
+
     /// @dev "feed" the token with msg.value 
     function feedWarrior(uint _id) public tokenExist(_id) payable returns(uint) {
         require(tokenIndexToOwner[_id] == msg.sender);
