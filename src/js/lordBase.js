@@ -51,7 +51,6 @@ const LordBase = {
               if (err) {
                 console.log(err)
               }
-              console.log('battle consequence : ' + Number(result.args.battleConsequence))
               resolve(Number(result.args.battleConsequence))
             })
           }).catch(err => {

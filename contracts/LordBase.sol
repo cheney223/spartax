@@ -30,7 +30,7 @@ contract LordBase is Random{
     function checkCoachCoolDown(uint coachId, uint attackId) external view returns(uint) {
         require(coachId <= 4);
         uint[13] memory attackToken = warriorBaseContract.getToken(attackId);
-        if (attackToken[8 + coachId] - now <= 60)
+        if (now - attackToken[8 + coachId] <= 60)
             return 0;
         return 1;
     }

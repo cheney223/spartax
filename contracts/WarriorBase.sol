@@ -30,7 +30,8 @@ contract WarriorBase is ERC721
 
     event SubPrestige(uint _id, uint winningPrestige);
 
-
+    event SetCoachCoolDownTime(uint coachId, uint attackId, uint curTime);
+    
     mapping (uint => address) internal tokenApprovals;
     
     mapping (uint => address) internal tokenIndexToOwner;
@@ -363,7 +364,8 @@ contract WarriorBase is ERC721
             attacker.lastAttackCoach3 = uint(now);
         else if (coachId == 4)
             attacker.lastAttackCoach4 = uint(now);
-    
+
+        emit SetCoachCoolDownTime(coachId, attackId, now);
     }
 
     /// @dev calculate the consequece of a finished battle
@@ -388,10 +390,8 @@ contract WarriorBase is ERC721
         }
 
         Warrior storage winner = WarriorList[winnerId];
-        winner.val = winner.val.add(valToTransfer);
         winner.winCount = winner.winCount.add(1);
         winner.combo = winner.combo.add(1);
-        winner.ce = winner.ce.add(ceToTransfer);
 
         Warrior storage loser = WarriorList[loserId];
         loser.lossCount = loser.lossCount.add(1);
@@ -404,21 +404,25 @@ contract WarriorBase is ERC721
             loser.ce = loser.ce.sub(ceToTransfer);
         }
 
-        if (winner.combo < 1)
-            winner.title = 0;
-        else if (winner.combo < 2)
-            winner.title = 1;
-        else if (winner.combo < 4)
-            winner.title = 2;
-        else if (winner.combo < 8)
-            winner.title = 3;
-        else if (winner.combo < 12)
-            winner.title = 4;
-        else if (winner.combo < 20)
-            winner.title = 5;
-        else
-            winner.title = 6;
-        
+        if (winner.title < 7) {
+            winner.val = winner.val.add(valToTransfer);
+            winner.ce = winner.ce.add(ceToTransfer);
+            if (winner.combo < 1)
+                winner.title = 0;
+            else if (winner.combo < 2)
+                winner.title = 1;
+            else if (winner.combo < 4)
+                winner.title = 2;
+            else if (winner.combo < 8)
+                winner.title = 3;
+            else if (winner.combo < 12)
+                winner.title = 4;
+            else if (winner.combo < 20)
+                winner.title = 5;
+            else
+                winner.title = 6;
+        }
+
         emit Consequence(winnerId,loserId, winnerAddr, loserAddr, valToTransfer, ceToTransfer, winner.title, loser.title);
         return valToTransfer;
     }
