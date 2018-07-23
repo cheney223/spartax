@@ -26,7 +26,15 @@ contract LordBase is Random{
     function setWarriorBaseContractd(address _warriorBaseContract) external {
         warriorBaseContract = WarriorBase(_warriorBaseContract);
     }
- 
+    
+    function checkCoachCoolDown(uint coachId, uint attackId) external view returns(uint) {
+        require(coachId <= 4);
+        uint[13] memory attackToken = warriorBaseContract.getToken(attackId);
+        if (attackToken[8 + coachId] - now <= 60)
+            return 0;
+        return 1;
+    }
+    
     function battle(
         uint attackId,
         uint defenceId) external returns(uint){
@@ -38,8 +46,8 @@ contract LordBase is Random{
         require(attackAddr != address(0));
         require(defenceAddr != address(0));
 
-        uint[9] memory attackToken = warriorBaseContract.getToken(attackId);
-        uint[9] memory defenceToken = warriorBaseContract.getToken(defenceId);
+        uint[13] memory attackToken = warriorBaseContract.getToken(attackId);
+        uint[13] memory defenceToken = warriorBaseContract.getToken(defenceId);
         uint attackCE = attackToken[6];
         uint defenceCE = defenceToken[6];
         uint defenceTitle = defenceToken[4];
@@ -47,9 +55,12 @@ contract LordBase is Random{
         uint battleConsequence;
         uint valToTransfer;
         
-        if (defenceTitle >= 7)
+        if (defenceTitle >= 7 && defenceTitle <= 10)
+        {
             dice = dice.sub((dice / 100) * 5);
-        
+            warriorBaseContract.setCoachCoolDownTime(defenceId, attackId);
+        }
+
         if (dice < attackCE) {
             valToTransfer = warriorBaseContract.consequence(attackId, defenceId, attackAddr, defenceAddr);
             databaseContract.addAccountEth(attackAddr, valToTransfer);

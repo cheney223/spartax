@@ -277,9 +277,17 @@ export default {
       this.$router.push('/fight')
     },
 
+    checkCoachCoolDown(coachId, attackId) {
+      LordBase.checkCoachCoolDown(coachId, attackId).then(function(value) {
+        return value
+      })
+    },
+
     fight(defenceId) {
       let self = this
       var indexInEnemyList = self.indexMapping.indexOf(defenceId)
+      var attackId = self.chosenToken.id
+
       if (self.enemylist[indexInEnemyList].status == 'beginner')
       {
         self.$message({
@@ -288,7 +296,29 @@ export default {
                 })
         return
       }
-      var attackId = self.chosenToken.id
+
+      if (self.enemylist[indexInEnemyList].title >= 7 && 
+            self.enemylist[indexInEnemyList].title <= 10 )
+      {
+        var isCoachCooled = checkCoachCoolDown(defenceId, attackId)
+
+        if (isCoachCooled == 0){
+          self.$message({
+                message: 'You cannot attack one coach within an hour!',
+                type: 'error'
+                })
+          return
+        }
+        
+        if (self.chosenToken.CE > self.enemylist[indexInEnemyList].CE.mul(2)) {
+          self.$message({
+                  message: 'You have been a experienced warrior! This coach cannot teach you more!',
+                  type: 'error'
+                  })
+          return
+        }
+      }
+
       var attackAddrPromise = WarriorBase.getTokenOwner(Number(attackId))
       var defenceAddrPromise = WarriorBase.getTokenOwner(Number(defenceId))
       

@@ -53,6 +53,11 @@ contract WarriorBase is ERC721
         uint ce;    /// comat effectiveness
         uint createTime;
         uint destroyTime;
+        uint lastAttackCoach1;
+        uint lastAttackCoach2;
+        uint lastAttackCoach3;
+        uint lastAttackCoach4;
+        
     }
 
     Warrior[] private WarriorList;
@@ -158,6 +163,10 @@ contract WarriorBase is ERC721
         war.ce = 10;
         war.createTime = now;
         war.destroyTime = 0;
+        war.lastAttackCoach1 = 0;
+        war.lastAttackCoach2 = 0;
+        war.lastAttackCoach3 = 0;
+        war.lastAttackCoach4 = 0;
         
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
@@ -188,7 +197,11 @@ contract WarriorBase is ERC721
         war.ce = 50;
         war.createTime = now;
         war.destroyTime = 0;
-        
+        war.lastAttackCoach1 = 0;
+        war.lastAttackCoach2 = 0;
+        war.lastAttackCoach3 = 0;
+        war.lastAttackCoach4 = 0;
+
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
         ActiveWarriorListLength = ActiveWarriorListLength.add(1);
@@ -218,7 +231,11 @@ contract WarriorBase is ERC721
         war.ce = 100;
         war.createTime = now;
         war.destroyTime = 0;
-        
+        war.lastAttackCoach1 = 0;
+        war.lastAttackCoach2 = 0;
+        war.lastAttackCoach3 = 0;
+        war.lastAttackCoach4 = 0;
+
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
         ActiveWarriorListLength = ActiveWarriorListLength.add(1);
@@ -248,7 +265,11 @@ contract WarriorBase is ERC721
         war.ce = 500;
         war.createTime = now;
         war.destroyTime = 0;
-        
+        war.lastAttackCoach1 = 0;
+        war.lastAttackCoach2 = 0;
+        war.lastAttackCoach3 = 0;
+        war.lastAttackCoach4 = 0;
+
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
         ActiveWarriorListLength = ActiveWarriorListLength.add(1);
@@ -272,7 +293,7 @@ contract WarriorBase is ERC721
     }
 
     /// @dev Ruturn token details by tokenId
-    function getToken(uint256 _id) external view tokenExist(_id) returns (uint[9] datas) {
+    function getToken(uint256 _id) external view tokenExist(_id) returns (uint[13] datas) {
         Warrior storage warrior = WarriorList[_id];
         datas[0] = warrior.val;
         datas[1] = warrior.winCount;
@@ -283,6 +304,11 @@ contract WarriorBase is ERC721
         datas[6] = warrior.ce;
         datas[7] = warrior.createTime;
         datas[8] = warrior.destroyTime;
+        datas[9] = warrior.lastAttackCoach1;
+        datas[10] = warrior.lastAttackCoach2;
+        datas[11] = warrior.lastAttackCoach3;
+        datas[12] = warrior.lastAttackCoach4;
+        
     }
 
     /// @dev return all tokens owned by owner
@@ -317,6 +343,22 @@ contract WarriorBase is ERC721
     /// @dev return active warrior numbers for now
     function getActiveWarriorListLength() external view returns(uint) {
         return ActiveWarriorListLength;
+    }
+
+
+    /// @dev set the timestamp of attacking each coach, you cannot attack them twice within an hour 
+    function setCoachCoolDownTime(uint coachId, uint attackId) external tokenExist(attackId){
+        Warrior storage attacker = WarriorList[attackId];
+        
+        if (coachId == 1)
+            attacker.lastAttackCoach1 = uint(now);
+        else if (coachId == 2)
+            attacker.lastAttackCoach2 = uint(now);
+        else if (coachId == 3)
+            attacker.lastAttackCoach3 = uint(now);
+        else if (coachId == 4)
+            attacker.lastAttackCoach4 = uint(now);
+    
     }
 
     /// @dev calculate the consequece of a finished battle

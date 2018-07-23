@@ -22,6 +22,20 @@ const LordBase = {
       })
     },
     
+    checkCoachCoolDown: function(coachId, attackId) {
+      let self = this
+      return new Promise(function (resolve,reject) {
+        self.instance.checkCoachCoolDown.call(
+          coachId,
+          attackId,
+          {from: window.web3.eth.accounts[0]}).then(coolDown => {
+            resolve(Number(coolDown))
+          }).catch(err => {
+            reject(err)
+          })
+      })
+    },
+
     battle: function(attackId, defenceId) {
       let self = this
       return new Promise(function (resolve, reject) {
