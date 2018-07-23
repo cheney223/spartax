@@ -26,6 +26,11 @@ contract WarriorBase is ERC721
 
     event KillWarrior(uint _id, address owner, uint tokenToOwnerIndex);
 
+    event AddPrestige(uint _id, uint winningPrestige, uint title);
+
+    event SubPrestige(uint _id, uint winningPrestige);
+
+
     mapping (uint => address) internal tokenApprovals;
     
     mapping (uint => address) internal tokenIndexToOwner;
@@ -420,10 +425,16 @@ contract WarriorBase is ERC721
 
     function addPrestige(uint tokenId, uint prestigeAmt) tokenExist(tokenId) external {
         WarriorList[tokenId].prestige = WarriorList[tokenId].prestige.add(prestigeAmt);
+        if ( WarriorList[tokenId].prestige >= 30 )
+            WarriorList[tokenId].title = 11;
+        if ( WarriorList[tokenId].prestige >= 40 )
+            WarriorList[tokenId].title = 12;
+        emit AddPrestige(tokenId, prestigeAmt, WarriorList[tokenId].title);
     }
 
     function subPrestige(uint tokenId, uint prestigeAmt) tokenExist(tokenId) external {
         WarriorList[tokenId].prestige = WarriorList[tokenId].prestige.sub(prestigeAmt);
+        emit SubPrestige(tokenId, prestigeAmt);
     }
 
     /// @dev "feed" the token with msg.value 

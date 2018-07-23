@@ -157,7 +157,7 @@ export default {
       chosenToken: {},
       indexMapping: [],
       NotHasChosen: true,
-      titleList: ['战士','勇士','战士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练']
+      titleList: ['战士','勇士','战士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练','战神','永生者']
     }
   },
   
@@ -309,7 +309,7 @@ export default {
                 })
           return
         }
-        
+
         if (self.chosenToken.CE > self.enemylist[indexInEnemyList].CE.mul(2)) {
           self.$message({
                   message: 'You have been a experienced warrior! This coach cannot teach you more!',
