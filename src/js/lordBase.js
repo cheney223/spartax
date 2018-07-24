@@ -59,6 +59,32 @@ const LordBase = {
           })
       })
     },
+
+    challengingGod: function(attackId, defenceId) {
+      let self = this
+      return new Promise(function (resolve, reject) {
+        console.log('attackId : '+ attackId)
+        console.log('defenceId : '+ defenceId)
+        console.log('from address : '+ window.web3.eth.accounts[0])
+        self.instance.challengingGod.sendTransaction(
+          attackId,
+          defenceId,
+          {from: window.web3.eth.accounts[0], 
+            value: window.web3.toWei('0.05', 'ether')}).then(winOrLose => {
+            var battleEvent = self.instance.ChallengingGod({attackId: attackId, defenceId: defenceId})
+            battleEvent.watch(function(err, result){
+              if (err) {
+                console.log(err)
+              }
+              resolve(Number(result.args.battleConsequence))
+            })
+          }).catch(err => {
+            reject(err)
+            console.log('err = '+ err)
+          })
+      })
+    },
+
 }
   
 export default LordBase

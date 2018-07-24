@@ -245,11 +245,11 @@ export default {
     calcStatus: function (title, createTime, destroyTime) {
       if (title >= 7)
         return 'coach'
-      var timestamp = Date.parse(new Date())
+      var timestamp = Date.parse(new Date())/1000
       console.log('timestamp: ' + timestamp + '; createTime : ' + createTime)
-      if (timestamp/1000 - createTime <= 1800)
+      if (timestamp - createTime <= 1800)
         return 'beginner'
-      if (timestamp/1000 - destroyTime <= 3600)
+      if (timestamp - destroyTime <= 3600)
         return 'suicider'
       return 'active'
     },
@@ -303,9 +303,9 @@ export default {
                   type: 'error'
                   })
             isCooled = false
-            return Promise.reject({
-              notRealPromiseException: true,
-            })
+            // return Promise.reject({
+            //   notRealPromiseException: true,
+            // })
           }
         })
        
@@ -349,7 +349,6 @@ export default {
 
                 WarriorBase.getToken(Number(defenceId)).then(function (value) {
                   var obj = {}
-                  /// var indexInEnemyList = self.indexMapping.indexOf(defenceId)
                   Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
                   Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
                   Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))

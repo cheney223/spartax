@@ -12,6 +12,7 @@ contract LordBase is Random{
     using SafeMath for uint64;
 
     event Battle(uint attackId, uint defenceId, uint battleConsequence);
+    event ChallengingGod(uint attackId, uint defenceId, uint battleConsequence);
     
     WarriorBase private warriorBaseContract;
     Database private databaseContract;
@@ -73,7 +74,7 @@ contract LordBase is Random{
         uint battleConsequence;
         uint valToTransfer;
         
-        if (defenceToken[4]>= 7 && defenceToken[4] <= 10)
+        if (defenceToken[4] >= 7 && defenceToken[4] <= 10)
         {
             dice = dice.sub((dice / 100) * 5);
             warriorBaseContract.setCoachCoolDownTime(defenceId, attackId);
@@ -83,7 +84,7 @@ contract LordBase is Random{
         if (dice < attackCE) {
             valToTransfer = warriorBaseContract.consequence(attackId, defenceId, attackAddr, defenceAddr);
             databaseContract.addAccountEth(attackAddr, valToTransfer);
-            if (attackToken[4] < 7) 
+            if (attackToken[4] < 7 || attackToken[4] > 10) 
             {
                 warriorBaseContract.addPrestige(attackId, winningPrestige);
             }
@@ -96,7 +97,7 @@ contract LordBase is Random{
         } else {
             valToTransfer = warriorBaseContract.consequence(defenceId, attackId, defenceAddr, attackAddr);
             databaseContract.addAccountEth(defenceAddr, valToTransfer);
-            if (attackToken[4] < 7)
+            if (attackToken[4] < 7 || attackToken[4] > 10)
             {
                 databaseContract.reduceAccountEth(attackAddr, valToTransfer);
                 warriorBaseContract.subPrestige(defenceId, attackToken[5].div(2));
@@ -109,6 +110,60 @@ contract LordBase is Random{
         }
 
         emit Battle(attackId, defenceId, battleConsequence);
+        return battleConsequence;
+    }
+
+    function challengingGod(
+        uint attackId,
+        uint defenceId) external payable returns(uint){
+        
+        require(msg.value >= 0.05 ether);
+
+        address attackAddr = warriorBaseContract.getTokenOwner(attackId);
+        address defenceAddr = warriorBaseContract.getTokenOwner(defenceId);
+        
+        require(attackAddr != address(0));
+        require(defenceAddr != address(0));
+
+        uint[13] memory attackToken = warriorBaseContract.getToken(attackId);
+        uint[13] memory defenceToken = warriorBaseContract.getToken(defenceId);
+        require(defenceToken[4] > 10);  /// the defender must be WarGod or Immortal
+
+        uint attackCE = attackToken[6];
+        uint defenceCE = defenceToken[6];
+        uint dice = _rand() % (attackCE + defenceCE);
+        dice = dice.sub((dice / 100) * 5);
+        uint battleConsequence;
+        uint valToTransfer;
+        
+        uint winningPrestige = defenceToken[5].div(2);  /// the winner can get half prestige of WarGod or Immortal
+
+        if (dice < attackCE) {
+            valToTransfer = warriorBaseContract.consequence(attackId, defenceId, attackAddr, defenceAddr);
+            databaseContract.addAccountEth(attackAddr, valToTransfer);
+            if (attackToken[4] < 7 || attackToken[4] > 10) 
+            {
+                warriorBaseContract.addPrestige(attackId, winningPrestige);
+            }
+
+            databaseContract.reduceAccountEth(defenceAddr, valToTransfer);
+            warriorBaseContract.subPrestige(defenceId, winningPrestige);
+            battleConsequence = 1;
+        } else {
+            valToTransfer = warriorBaseContract.consequence(defenceId, attackId, defenceAddr, attackAddr);
+            databaseContract.addAccountEth(defenceAddr, valToTransfer);
+            if (attackToken[4] < 7 || attackToken[4] > 10)
+            {
+                databaseContract.reduceAccountEth(attackAddr, valToTransfer);
+                warriorBaseContract.subPrestige(defenceId, attackToken[5].div(2));
+            }
+            
+            warriorBaseContract.addPrestige(defenceId, winningPrestige);
+            battleConsequence = 0;
+        }
+
+        defenceAddr.transfer(msg.value);
+        emit ChallengingGod(attackId, defenceId, battleConsequence);
         return battleConsequence;
     }
 

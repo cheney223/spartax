@@ -395,32 +395,35 @@ contract WarriorBase is ERC721
 
         Warrior storage loser = WarriorList[loserId];
         loser.lossCount = loser.lossCount.add(1);
+        loser.combo = 0;
 
-        if (loser.title < 7)        /// if the loser is a coach, his value shall not be reduced.
+        if (loser.title < 7 || loser.title > 10)        /// if the loser is a coach, his value shall not be reduced.
         {
             loser.val = loser.val.sub(valToTransfer);
-            loser.combo = 0;
             loser.title = 0;
             loser.ce = loser.ce.sub(ceToTransfer);
         }
 
-        if (winner.title < 7) {
+        if (winner.title < 7 || winner.title > 10) {
             winner.val = winner.val.add(valToTransfer);
             winner.ce = winner.ce.add(ceToTransfer);
-            if (winner.combo < 1)
-                winner.title = 0;
-            else if (winner.combo < 2)
-                winner.title = 1;
-            else if (winner.combo < 4)
-                winner.title = 2;
-            else if (winner.combo < 8)
-                winner.title = 3;
-            else if (winner.combo < 12)
-                winner.title = 4;
-            else if (winner.combo < 20)
-                winner.title = 5;
-            else
-                winner.title = 6;
+            if (winner.title < 7)
+            {
+                if (winner.combo < 1)
+                    winner.title = 0;
+                else if (winner.combo < 2)
+                    winner.title = 1;
+                else if (winner.combo < 4)
+                    winner.title = 2;
+                else if (winner.combo < 8)
+                    winner.title = 3;
+                else if (winner.combo < 12)
+                    winner.title = 4;
+                else if (winner.combo < 20)
+                    winner.title = 5;
+                else
+                    winner.title = 6;
+            }
         }
 
         emit Consequence(winnerId,loserId, winnerAddr, loserAddr, valToTransfer, ceToTransfer, winner.title, loser.title);
@@ -438,6 +441,11 @@ contract WarriorBase is ERC721
 
     function subPrestige(uint tokenId, uint prestigeAmt) tokenExist(tokenId) external {
         WarriorList[tokenId].prestige = WarriorList[tokenId].prestige.sub(prestigeAmt);
+        WarriorList[tokenId].title = 0;
+        if ( WarriorList[tokenId].prestige >= 30 )
+            WarriorList[tokenId].title = 11;
+        if ( WarriorList[tokenId].prestige >= 40 )
+            WarriorList[tokenId].title = 12;
         emit SubPrestige(tokenId, prestigeAmt);
     }
 
