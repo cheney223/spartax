@@ -247,9 +247,9 @@ export default {
         return 'coach'
       var timestamp = Date.parse(new Date())/1000
       console.log('timestamp: ' + timestamp + '; createTime : ' + createTime)
-      if (timestamp - createTime <= 1800)
+      if (timestamp - createTime <= 60)
         return 'beginner'
-      if (timestamp - destroyTime <= 3600)
+      if (timestamp - destroyTime <= 60)
         return 'suicider'
       return 'active'
     },
@@ -280,10 +280,13 @@ export default {
 
     fight(defenceId) {
       let self = this
-      var indexInEnemyList = self.indexMapping.indexOf(defenceId)
-      var attackId = self.chosenToken.id
-      var enemyTitle = self.enemylist[indexInEnemyList].title
-      var isCooled = true
+      let indexInEnemyList = self.indexMapping.indexOf(defenceId)
+      let attackId = self.chosenToken.id
+      let enemyTitle = self.enemylist[indexInEnemyList].title
+      let isContinue = false
+      let attackAddrPromise = WarriorBase.getTokenOwner(Number(attackId))
+      let defenceAddrPromise = WarriorBase.getTokenOwner(Number(defenceId))
+
       if (self.enemylist[indexInEnemyList].status == 'beginner')
       {
         self.$message({
@@ -292,23 +295,73 @@ export default {
                 })
         return
       }
+
+      if (self.enemylist[indexInEnemyList].title == '战神' || self.enemylist[indexInEnemyList].title == '永生者')
+      {
+        self.$confirm('你将要攻击战神，需付费0.05 eth?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          attackAddrPromise.then(function (value){
+            console.log('is continue : ' + isContinue)
+            var attackAddr = value
+            defenceAddrPromise.then(function (value) {
+              var defenceAddr = value
+              console.log('attack id : '+ attackId)
+              console.log('defence id : '+ defenceId)
+              
+              LordBase.battle(
+                Number(attackId),
+                Number(defenceId),
+                ).then( function(value) {
+                  console.log('vue value : '+ Number(value))
+                  if (Number(value) == 1) {
+                    self.$message({
+                    message: 'You won!',
+                    type: 'success'
+                    })
+                  }
+                  else {
+                    self.$message({
+                    message: 'You Lose!',
+                    type: 'error'
+                    })
+                  }
+
+                  WarriorBase.getToken(Number(defenceId)).then(function (value) {
+                    var obj = {}
+                    Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
+                    Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
+                    Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
+                    Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
+                    Vue.set(self.enemylist[indexInEnemyList],'title',self.titleList[Number(value[4])])
+                    Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
+                    Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
+                    
+                    WarriorBase.getToken(Number(attackId)).then(function (value) {
+                      var obj = {}
+                      Vue.set(self.chosenToken,'val',Number(value[0]))
+                      Vue.set(self.chosenToken,'winCount',Number(value[1]))
+                      Vue.set(self.chosenToken,'lossCount',Number(value[2]))
+                      Vue.set(self.chosenToken,'combo',Number(value[3]))
+                      Vue.set(self.chosenToken,'title',self.titleList[Number(value[4])])
+                      Vue.set(self.chosenToken,'prestige',Number(value[5]))
+                      Vue.set(self.chosenToken,'CE',Number(value[6]))
+                      var newPercentage =  self.chosenToken.CE / (self.chosenToken.CE + self.enemylist[indexInEnemyList].CE) * 100
+                      Vue.set(self.enemylist[indexInEnemyList],'winningPercentage',Number(newPercentage).toFixed(2))
+                    })
+                  })
+              })
+            })
+          })
+        }).catch(() => {
+          })
+      }
+
+      console.log('index of enemy title : ' + self.titleList.indexOf(enemyTitle))
       if (self.titleList.indexOf(enemyTitle) >= 7 &&  self.titleList.indexOf(enemyTitle) <= 10)
       {
-        
-        LordBase.checkCoachCoolDown(indexInEnemyList + 1, attackId).then(function (checkCoachCoolDown ) {
-          console.log('checkCoachCoolDown : ' + checkCoachCoolDown)
-          if (checkCoachCoolDown == 0){
-            self.$message({
-                  message: 'You cannot attack one coach within an hour!',
-                  type: 'error'
-                  })
-            isCooled = false
-            // return Promise.reject({
-            //   notRealPromiseException: true,
-            // })
-          }
-        })
-       
         if (self.chosenToken.CE > self.enemylist[indexInEnemyList].CE * 2) {
           self.$message({
                   message: 'You have been a experienced warrior! This coach cannot teach you more!',
@@ -316,65 +369,71 @@ export default {
                   })
           return
         }
-      }
 
-      var attackAddrPromise = WarriorBase.getTokenOwner(Number(attackId))
-      var defenceAddrPromise = WarriorBase.getTokenOwner(Number(defenceId))
-      
-      attackAddrPromise.then(function (value){
-        if (isCooled == true) {
-          console.log('attackAddr = '+ value)
-          var attackAddr = value
-          defenceAddrPromise.then(function (value) {
-            var defenceAddr = value
-            console.log('defenceAddr = '+ value)
-
-            LordBase.battle(
-              Number(attackId),
-              Number(defenceId),
-              ).then( function(value) {
-                console.log('vue value : '+ Number(value))
-                if (Number(value) == 1) {
-                  self.$message({
-                  message: 'You won!',
-                  type: 'success'
-                  })
-                }
-                else {
-                  self.$message({
-                  message: 'You Lose!',
+        LordBase.checkCoachCoolDown(indexInEnemyList + 1, attackId).then(function (checkCoachCoolDown ) {
+          console.log('checkCoachCoolDown : ' + checkCoachCoolDown)
+          if (checkCoachCoolDown == 0){
+            self.$message({
+                  message: 'You cannot attack one coach within an hour!',
                   type: 'error'
                   })
-                }
+            
+          } else {
+            attackAddrPromise.then(function (value){
+              console.log('is continue : ' + isContinue)
+              var attackAddr = value
+              defenceAddrPromise.then(function (value) {
+                var defenceAddr = value
+                console.log('attack id : '+ attackId)
+                console.log('defence id : '+ defenceId)
+                
+                LordBase.battle(
+                  Number(attackId),
+                  Number(defenceId),
+                  ).then( function(value) {
+                    console.log('vue value : '+ Number(value))
+                    if (Number(value) == 1) {
+                      self.$message({
+                      message: 'You won!',
+                      type: 'success'
+                      })
+                    }
+                    else {
+                      self.$message({
+                      message: 'You Lose!',
+                      type: 'error'
+                      })
+                    }
 
-                WarriorBase.getToken(Number(defenceId)).then(function (value) {
-                  var obj = {}
-                  Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
-                  Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
-                  Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
-                  Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
-                  Vue.set(self.enemylist[indexInEnemyList],'title',self.titleList[Number(value[4])])
-                  Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
-                  Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
-                  
-                  WarriorBase.getToken(Number(attackId)).then(function (value) {
-                    var obj = {}
-                    Vue.set(self.chosenToken,'val',Number(value[0]))
-                    Vue.set(self.chosenToken,'winCount',Number(value[1]))
-                    Vue.set(self.chosenToken,'lossCount',Number(value[2]))
-                    Vue.set(self.chosenToken,'combo',Number(value[3]))
-                    Vue.set(self.chosenToken,'title',self.titleList[Number(value[4])])
-                    Vue.set(self.chosenToken,'prestige',Number(value[5]))
-                    Vue.set(self.chosenToken,'CE',Number(value[6]))
-                    var newPercentage =  self.chosenToken.CE / (self.chosenToken.CE + self.enemylist[indexInEnemyList].CE) * 100
-                    Vue.set(self.enemylist[indexInEnemyList],'winningPercentage',Number(newPercentage).toFixed(2))
-                  })
+                    WarriorBase.getToken(Number(defenceId)).then(function (value) {
+                      var obj = {}
+                      Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
+                      Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
+                      Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
+                      Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
+                      Vue.set(self.enemylist[indexInEnemyList],'title',self.titleList[Number(value[4])])
+                      Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
+                      Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
+                      
+                      WarriorBase.getToken(Number(attackId)).then(function (value) {
+                        var obj = {}
+                        Vue.set(self.chosenToken,'val',Number(value[0]))
+                        Vue.set(self.chosenToken,'winCount',Number(value[1]))
+                        Vue.set(self.chosenToken,'lossCount',Number(value[2]))
+                        Vue.set(self.chosenToken,'combo',Number(value[3]))
+                        Vue.set(self.chosenToken,'title',self.titleList[Number(value[4])])
+                        Vue.set(self.chosenToken,'prestige',Number(value[5]))
+                        Vue.set(self.chosenToken,'CE',Number(value[6]))
+                        var newPercentage =  self.chosenToken.CE / (self.chosenToken.CE + self.enemylist[indexInEnemyList].CE) * 100
+                        Vue.set(self.enemylist[indexInEnemyList],'winningPercentage',Number(newPercentage).toFixed(2))
+                      })
+                    })
                 })
-
+              })
             })
-          })
-        }
-      })
+          }
+        })
+      }
       
     }
   }
@@ -389,7 +448,7 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 10%;
-  width:960;
+  width:960px;
   margin-left:auto;
   margin-right:auto;
 }

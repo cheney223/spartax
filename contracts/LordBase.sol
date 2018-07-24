@@ -81,7 +81,7 @@ contract LordBase is Random{
         }
         uint winningPrestige = calcPrestige(dice * 100 / (attackCE + defenceCE));
 
-        if (dice < attackCE) {
+        if (dice < attackCE) {  /// win 
             valToTransfer = warriorBaseContract.consequence(attackId, defenceId, attackAddr, defenceAddr);
             databaseContract.addAccountEth(attackAddr, valToTransfer);
             if (attackToken[4] < 7 || attackToken[4] > 10) 
@@ -94,7 +94,7 @@ contract LordBase is Random{
                 warriorBaseContract.subPrestige(defenceId, defenceToken[5].div(2));
             }
             battleConsequence = 1;
-        } else {
+        } else {    /// lose
             valToTransfer = warriorBaseContract.consequence(defenceId, attackId, defenceAddr, attackAddr);
             databaseContract.addAccountEth(defenceAddr, valToTransfer);
             if (attackToken[4] < 7 || attackToken[4] > 10)
