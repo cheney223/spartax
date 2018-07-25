@@ -39,9 +39,7 @@ const LordBase = {
     battle: function(attackId, defenceId) {
       let self = this
       return new Promise(function (resolve, reject) {
-        console.log('attackId : '+ attackId)
-        console.log('defenceId : '+ defenceId)
-        console.log('from address : '+ window.web3.eth.accounts[0])
+
         self.instance.battle.sendTransaction(
           attackId,
           defenceId,
@@ -63,9 +61,6 @@ const LordBase = {
     challengingGod: function(attackId, defenceId) {
       let self = this
       return new Promise(function (resolve, reject) {
-        console.log('attackId : '+ attackId)
-        console.log('defenceId : '+ defenceId)
-        console.log('from address : '+ window.web3.eth.accounts[0])
         self.instance.challengingGod.sendTransaction(
           attackId,
           defenceId,

@@ -20,7 +20,7 @@ contract WarriorBase is ERC721
     /// @dev This emits when user charged his warrior
     event NewFund(uint _value);
     /// @dev This emits when a new warrior is created(adopted) by user
-    event CreateWarrior(address _owner, uint _val);
+    event CreateWarrior(address _owner, uint newWarriorId, uint _val);
 
     event Consequence(uint winnerId, uint loserId, address winnerAddr, address loserAddr, uint valToTransfer, uint ceToTransfer, uint winnerTitle, uint loserTitle);
 
@@ -31,6 +31,8 @@ contract WarriorBase is ERC721
     event SubPrestige(uint _id, uint winningPrestige);
 
     event SetCoachCoolDownTime(uint coachId, uint attackId, uint curTime);
+
+    event SwitchRetirementStatus(uint tokenId, uint retirementStatus);
     
     mapping (uint => address) internal tokenApprovals;
     
@@ -50,19 +52,20 @@ contract WarriorBase is ERC721
     uint constant miniValue = 10 ** 16;
 
     struct Warrior {
-        uint val;
-        uint winCount;
-        uint lossCount;
-        uint combo;
-        uint title;     /// title: default--0 primary coach--7 intermediate coach--8 advanced coach--9 master--10
-        uint prestige;
-        uint ce;    /// comat effectiveness
-        uint createTime;
-        uint destroyTime;
-        uint lastAttackCoach1;
-        uint lastAttackCoach2;
-        uint lastAttackCoach3;
-        uint lastAttackCoach4;
+        uint val;   /// 0
+        uint winCount;  /// 1
+        uint lossCount; /// 2
+        uint combo; /// 3
+        uint title;     /// 4 title: default--0 primary coach--7 intermediate coach--8 advanced coach--9 master--10
+        uint prestige;  /// 5 
+        uint ce;    /// 6 comat effectiveness
+        uint createTime;    /// 7
+        uint destroyTime;   /// 8
+        uint lastAttackCoach1;  /// 9
+        uint lastAttackCoach2;  /// 10
+        uint lastAttackCoach3;  /// 11
+        uint lastAttackCoach4;  /// 12
+        uint retired;   /// 13
         
     }
 
@@ -177,7 +180,7 @@ contract WarriorBase is ERC721
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
         ActiveWarriorListLength = ActiveWarriorListLength.add(1);
-        CreateWarrior(msg.sender, msg.value);
+        CreateWarrior(msg.sender,newWarriorId, msg.value);
         return newWarriorId;
     }
 
@@ -211,7 +214,7 @@ contract WarriorBase is ERC721
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
         ActiveWarriorListLength = ActiveWarriorListLength.add(1);
-        CreateWarrior(msg.sender, msg.value);
+        CreateWarrior(msg.sender, newWarriorId, msg.value);
         return newWarriorId;
     }
 
@@ -245,7 +248,7 @@ contract WarriorBase is ERC721
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
         ActiveWarriorListLength = ActiveWarriorListLength.add(1);
-        CreateWarrior(msg.sender, msg.value);
+        CreateWarrior(msg.sender, newWarriorId, msg.value);
         return newWarriorId;
     }
 
@@ -279,7 +282,7 @@ contract WarriorBase is ERC721
         _transfer(0,msg.sender, newWarriorId);
         databaseContract.addAccountEth(msg.sender, msg.value);
         ActiveWarriorListLength = ActiveWarriorListLength.add(1);
-        CreateWarrior(msg.sender, msg.value);
+        CreateWarrior(msg.sender, newWarriorId, msg.value);
         return newWarriorId;
     }
 
@@ -447,6 +450,12 @@ contract WarriorBase is ERC721
         if ( WarriorList[tokenId].prestige >= 40 )
             WarriorList[tokenId].title = 12;
         emit SubPrestige(tokenId, prestigeAmt);
+    }
+
+    function switchRetirementStatus(uint tokenId) tokenExist(tokenId) external {
+        require(WarriorList[tokenId].title == 12);
+        WarriorList[tokenId].retired = 1 - WarriorList[tokenId].retired;
+        emit SwitchRetirementStatus(tokenId, WarriorList[tokenId].retired);
     }
 
     /// @dev "feed" the token with msg.value 

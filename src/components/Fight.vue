@@ -278,6 +278,59 @@ export default {
       this.$router.push('/fight')
     },
 
+    callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId){
+      let self = this
+      attackAddrPromise.then(function (value){
+        var attackAddr = value
+        defenceAddrPromise.then(function (value) {
+          var defenceAddr = value
+          LordBase.battle(
+            Number(attackId),
+            Number(defenceId),
+            ).then( function(value) {
+              console.log('Battle Consequence : '+ Number(value))
+              if (Number(value) == 1) {
+                self.$message({
+                message: 'You won!',
+                type: 'success'
+                })
+              }
+              else {
+                self.$message({
+                message: 'You Lose!',
+                type: 'error'
+                })
+              }
+
+              WarriorBase.getToken(Number(defenceId)).then(function (value) {
+                var obj = {}
+                Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
+                Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
+                Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
+                Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
+                Vue.set(self.enemylist[indexInEnemyList],'title',self.titleList[Number(value[4])])
+                Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
+                Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
+                
+                WarriorBase.getToken(Number(attackId)).then(function (value) {
+                  var obj = {}
+                  Vue.set(self.chosenToken,'val',Number(value[0]))
+                  Vue.set(self.chosenToken,'winCount',Number(value[1]))
+                  Vue.set(self.chosenToken,'lossCount',Number(value[2]))
+                  Vue.set(self.chosenToken,'combo',Number(value[3]))
+                  Vue.set(self.chosenToken,'title',self.titleList[Number(value[4])])
+                  Vue.set(self.chosenToken,'prestige',Number(value[5]))
+                  Vue.set(self.chosenToken,'CE',Number(value[6]))
+                  var newPercentage =  self.chosenToken.CE / (self.chosenToken.CE + self.enemylist[indexInEnemyList].CE) * 100
+                  Vue.set(self.enemylist[indexInEnemyList],'winningPercentage',Number(newPercentage).toFixed(2))
+                })
+              })
+          })
+        })
+      })
+    },
+
+
     fight(defenceId) {
       let self = this
       let indexInEnemyList = self.indexMapping.indexOf(defenceId)
@@ -298,69 +351,15 @@ export default {
 
       if (self.enemylist[indexInEnemyList].title == '战神' || self.enemylist[indexInEnemyList].title == '永生者')
       {
-        self.$confirm('你将要攻击战神，需付费0.05 eth?', '提示', {
+        self.$confirm('你将要攻击明星对手，需付费0.05 eth 并且承受对手的暗箱操作?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          attackAddrPromise.then(function (value){
-            console.log('is continue : ' + isContinue)
-            var attackAddr = value
-            defenceAddrPromise.then(function (value) {
-              var defenceAddr = value
-              console.log('attack id : '+ attackId)
-              console.log('defence id : '+ defenceId)
-              
-              LordBase.battle(
-                Number(attackId),
-                Number(defenceId),
-                ).then( function(value) {
-                  console.log('vue value : '+ Number(value))
-                  if (Number(value) == 1) {
-                    self.$message({
-                    message: 'You won!',
-                    type: 'success'
-                    })
-                  }
-                  else {
-                    self.$message({
-                    message: 'You Lose!',
-                    type: 'error'
-                    })
-                  }
-
-                  WarriorBase.getToken(Number(defenceId)).then(function (value) {
-                    var obj = {}
-                    Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
-                    Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
-                    Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
-                    Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
-                    Vue.set(self.enemylist[indexInEnemyList],'title',self.titleList[Number(value[4])])
-                    Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
-                    Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
-                    
-                    WarriorBase.getToken(Number(attackId)).then(function (value) {
-                      var obj = {}
-                      Vue.set(self.chosenToken,'val',Number(value[0]))
-                      Vue.set(self.chosenToken,'winCount',Number(value[1]))
-                      Vue.set(self.chosenToken,'lossCount',Number(value[2]))
-                      Vue.set(self.chosenToken,'combo',Number(value[3]))
-                      Vue.set(self.chosenToken,'title',self.titleList[Number(value[4])])
-                      Vue.set(self.chosenToken,'prestige',Number(value[5]))
-                      Vue.set(self.chosenToken,'CE',Number(value[6]))
-                      var newPercentage =  self.chosenToken.CE / (self.chosenToken.CE + self.enemylist[indexInEnemyList].CE) * 100
-                      Vue.set(self.enemylist[indexInEnemyList],'winningPercentage',Number(newPercentage).toFixed(2))
-                    })
-                  })
-              })
-            })
-          })
+          self.callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId)
         }).catch(() => {
           })
-      }
-
-      console.log('index of enemy title : ' + self.titleList.indexOf(enemyTitle))
-      if (self.titleList.indexOf(enemyTitle) >= 7 &&  self.titleList.indexOf(enemyTitle) <= 10)
+      } else if (self.titleList.indexOf(enemyTitle) >= 7 &&  self.titleList.indexOf(enemyTitle) <= 10)
       {
         if (self.chosenToken.CE > self.enemylist[indexInEnemyList].CE * 2) {
           self.$message({
@@ -379,62 +378,13 @@ export default {
                   })
             
           } else {
-            attackAddrPromise.then(function (value){
-              console.log('is continue : ' + isContinue)
-              var attackAddr = value
-              defenceAddrPromise.then(function (value) {
-                var defenceAddr = value
-                console.log('attack id : '+ attackId)
-                console.log('defence id : '+ defenceId)
-                
-                LordBase.battle(
-                  Number(attackId),
-                  Number(defenceId),
-                  ).then( function(value) {
-                    console.log('vue value : '+ Number(value))
-                    if (Number(value) == 1) {
-                      self.$message({
-                      message: 'You won!',
-                      type: 'success'
-                      })
-                    }
-                    else {
-                      self.$message({
-                      message: 'You Lose!',
-                      type: 'error'
-                      })
-                    }
-
-                    WarriorBase.getToken(Number(defenceId)).then(function (value) {
-                      var obj = {}
-                      Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
-                      Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
-                      Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
-                      Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
-                      Vue.set(self.enemylist[indexInEnemyList],'title',self.titleList[Number(value[4])])
-                      Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
-                      Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
-                      
-                      WarriorBase.getToken(Number(attackId)).then(function (value) {
-                        var obj = {}
-                        Vue.set(self.chosenToken,'val',Number(value[0]))
-                        Vue.set(self.chosenToken,'winCount',Number(value[1]))
-                        Vue.set(self.chosenToken,'lossCount',Number(value[2]))
-                        Vue.set(self.chosenToken,'combo',Number(value[3]))
-                        Vue.set(self.chosenToken,'title',self.titleList[Number(value[4])])
-                        Vue.set(self.chosenToken,'prestige',Number(value[5]))
-                        Vue.set(self.chosenToken,'CE',Number(value[6]))
-                        var newPercentage =  self.chosenToken.CE / (self.chosenToken.CE + self.enemylist[indexInEnemyList].CE) * 100
-                        Vue.set(self.enemylist[indexInEnemyList],'winningPercentage',Number(newPercentage).toFixed(2))
-                      })
-                    })
-                })
-              })
-            })
+            self.callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId)
           }
+        }).catch(() =>{
         })
+      } else {
+        self.callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId)
       }
-      
     }
   }
 }
