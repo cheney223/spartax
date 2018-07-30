@@ -278,7 +278,60 @@ export default {
       this.$router.push('/fight')
     },
 
-    callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId){
+    callChallengingGodAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId, indexInEnemyList)
+    {
+      let self = this
+      attackAddrPromise.then(function (value){
+        var attackAddr = value
+        defenceAddrPromise.then(function (value) {
+          var defenceAddr = value
+          LordBase.challengingGod(
+            Number(attackId),
+            Number(defenceId),
+            ).then( function(value) {
+              console.log('Battle Consequence : '+ Number(value))
+              if (Number(value) == 1) {
+                self.$message({
+                message: 'You have defeated the Hero in the arena!',
+                type: 'success'
+                })
+              }
+              else {
+                self.$message({
+                message: 'You Lose!',
+                type: 'error'
+                })
+              }
+
+              WarriorBase.getToken(Number(defenceId)).then(function (value) {
+                var obj = {}
+                Vue.set(self.enemylist[indexInEnemyList],'val',Number(value[0]))
+                Vue.set(self.enemylist[indexInEnemyList],'winCount',Number(value[1]))
+                Vue.set(self.enemylist[indexInEnemyList],'lossCount',Number(value[2]))
+                Vue.set(self.enemylist[indexInEnemyList],'combo',Number(value[3]))
+                Vue.set(self.enemylist[indexInEnemyList],'title',self.titleList[Number(value[4])])
+                Vue.set(self.enemylist[indexInEnemyList],'prestige',Number(value[5]))
+                Vue.set(self.enemylist[indexInEnemyList],'CE',Number(value[6]))
+                
+                WarriorBase.getToken(Number(attackId)).then(function (value) {
+                  var obj = {}
+                  Vue.set(self.chosenToken,'val',Number(value[0]))
+                  Vue.set(self.chosenToken,'winCount',Number(value[1]))
+                  Vue.set(self.chosenToken,'lossCount',Number(value[2]))
+                  Vue.set(self.chosenToken,'combo',Number(value[3]))
+                  Vue.set(self.chosenToken,'title',self.titleList[Number(value[4])])
+                  Vue.set(self.chosenToken,'prestige',Number(value[5]))
+                  Vue.set(self.chosenToken,'CE',Number(value[6]))
+                  var newPercentage =  self.chosenToken.CE / (self.chosenToken.CE + self.enemylist[indexInEnemyList].CE) * 100
+                  Vue.set(self.enemylist[indexInEnemyList],'winningPercentage',Number(newPercentage).toFixed(2))
+                })
+              })
+          })
+        })
+      })
+    },
+
+    callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId, indexInEnemyList){
       let self = this
       attackAddrPromise.then(function (value){
         var attackAddr = value
@@ -356,7 +409,7 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          self.callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId)
+          self.callChallengingGodAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId, indexInEnemyList)
         }).catch(() => {
           })
       } else if (self.titleList.indexOf(enemyTitle) >= 7 &&  self.titleList.indexOf(enemyTitle) <= 10)
@@ -378,12 +431,12 @@ export default {
                   })
             
           } else {
-            self.callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId)
+            self.callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId, indexInEnemyList)
           }
         }).catch(() =>{
         })
       } else {
-        self.callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId)
+        self.callBattleAndUpdate(attackAddrPromise, defenceAddrPromise, attackId, defenceId, indexInEnemyList)
       }
     }
   }

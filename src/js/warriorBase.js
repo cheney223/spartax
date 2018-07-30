@@ -28,6 +28,20 @@ const WarriorBase = {
       return window.web3.eth.accounts[0]
     },
 
+    switchRetirementStatus: function(tokenId) {
+      let self = this
+      return new Promise(function(resolve,reject) {
+        self.instance.switchRetirementStatus.sendTransaction(
+          tokenId,
+          {from: window.web3.eth.accounts[0]}
+        ).then(switchRetirementStatus => {
+          resolve(switchRetirementStatus)
+        }).reject(err => {
+          reject(err)
+        })
+      })
+    },
+
     getActiveWarriorListLength: function() {
       let self = this
       return new Promise(function(resolve,reject) {

@@ -65,7 +65,7 @@ contract WarriorBase is ERC721
         uint lastAttackCoach2;  /// 10
         uint lastAttackCoach3;  /// 11
         uint lastAttackCoach4;  /// 12
-        uint retired;   /// 13
+        uint isRetired;   /// 13
         
     }
 
@@ -302,7 +302,7 @@ contract WarriorBase is ERC721
     }
 
     /// @dev Ruturn token details by tokenId
-    function getToken(uint256 _id) external view tokenExist(_id) returns (uint[13] datas) {
+    function getToken(uint256 _id) external view tokenExist(_id) returns (uint[14] datas) {
         Warrior storage warrior = WarriorList[_id];
         datas[0] = warrior.val;
         datas[1] = warrior.winCount;
@@ -317,6 +317,7 @@ contract WarriorBase is ERC721
         datas[10] = warrior.lastAttackCoach2;
         datas[11] = warrior.lastAttackCoach3;
         datas[12] = warrior.lastAttackCoach4;
+        datas[13] = warrior.isRetired;
         
     }
 
@@ -341,12 +342,11 @@ contract WarriorBase is ERC721
         tokens = new uint256[](length);
         uint index = 0;
         for (uint256 i = 1; i < WarriorList.length; ++i) {
-            if (tokenIndexToOwner[i] != _owner) {
+            if (tokenIndexToOwner[i] != _owner && tokenIndexToOwner[i] != address(0)) {
                 tokens[index] = i;
                 index += 1;
             }
         }
-
     }
 
     /// @dev return active warrior numbers for now
@@ -454,8 +454,8 @@ contract WarriorBase is ERC721
 
     function switchRetirementStatus(uint tokenId) tokenExist(tokenId) external {
         require(WarriorList[tokenId].title == 12);
-        WarriorList[tokenId].retired = 1 - WarriorList[tokenId].retired;
-        emit SwitchRetirementStatus(tokenId, WarriorList[tokenId].retired);
+        WarriorList[tokenId].isRetired = 1 - WarriorList[tokenId].isRetired;
+        emit SwitchRetirementStatus(tokenId, WarriorList[tokenId].isRetired);
     }
 
     /// @dev "feed" the token with msg.value 

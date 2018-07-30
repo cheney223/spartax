@@ -100,8 +100,11 @@
                     <span style="position:relative;left:-55px;">combo {{ownToken.combo}}</span>
                     <span style="position:relative;left:20px;"> CE {{ownToken.CE}}</span>
                   </div>
-                  <el-button type="text" style="position:relative;left:-20px;" @click="pick(ownToken.id)"><font size="4">Pick</font></el-button>
-                  <el-button type="text" style="position:relative;left:20px;" @click="kill(ownToken.id)"><font size="4">Kill</font></el-button>
+                  <el-button type="text" style="position:relative;left:-20px;" @click="pick(ownToken.id)"><font size="4">出阵</font></el-button>
+                  <el-button type="text" style="position:relative;left:20px;" @click="kill(ownToken.id)"><font size="4">暗杀</font></el-button>
+                  <div v-if="ownToken.isImmortal">
+                    <el-switch v-model="ownToken.isRetired" active-text="卸甲归田" inactive-text="重装上阵" @change="switchRetirementStatus(ownToken.id)"></el-switch>
+                  </div>
               </div>
             </div>
           </el-card>
@@ -130,6 +133,7 @@ export default {
       curAddr: window.web3.eth.accounts[0],
       accountDetail: {},
       ownTokenList: [],
+      isRetired: false,
       titleList: ['战士','勇士','历战勇士','百夫长','军团长','将军','统帅','初级格斗教练','中级格斗教练','高级格斗教练','大师级教练','战神','永生者']
     }
   },
@@ -168,6 +172,8 @@ export default {
         obj.destroyTime = Number(value[i][8])
         obj.id = tokenIds[i]
         obj.show = true
+        obj.isImmortal = (obj.title == 12) ? true : false
+        obj.isRetired = (obj.isImmortal == false) ? 0 : Number(value[i][13])
         self.ownTokenList.push(obj)
       }
     })
@@ -206,6 +212,12 @@ export default {
         }
       
       })
+    },
+
+    switchRetirementStatus(id) {
+      let self = this
+       WarriorBase.switchRetirementStatus(id).then().catch(() => {
+       })
     },
 
     routerToWeapon(){

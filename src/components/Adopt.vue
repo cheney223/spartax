@@ -176,7 +176,7 @@ export default {
     let self = this
     WarriorBase.getActiveWarriorListLength().then(ActiveWarriorListLength => {
       Vue.set(self.contractDetails,'warriorNum',Number(ActiveWarriorListLength))
-      console.log('All token number : ' + getTokenNum)
+      console.log('All token number : ' + ActiveWarriorListLength)
     })
 
     Database.getAccountEth(self.curAddr).then(getAccountEth => {

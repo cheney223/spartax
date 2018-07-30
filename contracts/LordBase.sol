@@ -30,7 +30,7 @@ contract LordBase is Random{
     
     function checkCoachCoolDown(uint coachId, uint attackId) external view returns(uint) {
         require(coachId <= 4);
-        uint[13] memory attackToken = warriorBaseContract.getToken(attackId);
+        uint[14] memory attackToken = warriorBaseContract.getToken(attackId);
         if (now - attackToken[8 + coachId] <= 60)
             return 0;
         return 1;
@@ -66,8 +66,8 @@ contract LordBase is Random{
         require(attackAddr != address(0));
         require(defenceAddr != address(0));
 
-        uint[13] memory attackToken = warriorBaseContract.getToken(attackId);
-        uint[13] memory defenceToken = warriorBaseContract.getToken(defenceId);
+        uint[14] memory attackToken = warriorBaseContract.getToken(attackId);
+        uint[14] memory defenceToken = warriorBaseContract.getToken(defenceId);
         uint attackCE = attackToken[6];
         uint defenceCE = defenceToken[6];
         uint dice = _rand() % (attackCE + defenceCE);
@@ -125,8 +125,8 @@ contract LordBase is Random{
         require(attackAddr != address(0));
         require(defenceAddr != address(0));
 
-        uint[13] memory attackToken = warriorBaseContract.getToken(attackId);
-        uint[13] memory defenceToken = warriorBaseContract.getToken(defenceId);
+        uint[14] memory attackToken = warriorBaseContract.getToken(attackId);
+        uint[14] memory defenceToken = warriorBaseContract.getToken(defenceId);
         require(defenceToken[4] > 10);  /// the defender must be WarGod or Immortal
 
         uint attackCE = attackToken[6];
